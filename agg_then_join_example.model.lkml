@@ -1,5 +1,77 @@
 connection: "thelook_events_redshift"
 
+view: users {
+  sql_table_name: public.users ;;
+  dimension: id {primary_key:yes}
+  dimension: city {}
+  dimension: state {}
+  dimension: country {}
+  dimension: zip {}
+  dimension: month {
+    type: date_month
+    sql: ${TABLE}.created_at ;;
+  }
+}
+explore: users {hidden:yes}
+view: events {
+  sql_table_name: public.events ;;
+  dimension: id {primary_key:yes}
+  dimension: city {}
+  dimension: state {}
+  dimension: country {}
+  dimension: zip {}
+  dimension: month {
+    type: date_month
+    sql: ${TABLE}.created_at ;;
+  }
+}
+explore: events {hidden:yes}
+
+view: users_ndt {
+  derived_table: {
+    explore_source: users {
+      column: id {}
+      column: city {}
+      column: state {}
+      column: country {}
+      column: zip {}
+      column: month {}
+    }
+  }
+  dimension: id {primary_key:yes}
+  dimension: city {}
+  dimension: state {}
+  dimension: country {}
+  dimension: zip {}
+  dimension: month {}
+}
+view: events_ndt {
+  derived_table: {
+    explore_source: events {
+      column: id {}
+      column: city {}
+      column: state {}
+      column: country {}
+      column: zip {}
+      column: month {}
+    }
+  }
+  dimension: id {primary_key:yes}
+  dimension: city {}
+  dimension: state {}
+  dimension: country {}
+  dimension: zip {}
+  dimension: month {}
+}
+# events_x as (
+#   select *, DATE_TRUNC('month', CONVERT_TIMEZONE('UTC', 'America/New_York', created_at )) as month from public.events
+#   where {%condition month%}events.created_at{%endcondition%}
+#   and {%condition state%}events.state{%endcondition%}
+# )
+# ,users_x as (select *, DATE_TRUNC('month', CONVERT_TIMEZONE('UTC', 'America/New_York', created_at )) as month from public.users
+#   where {%condition month%}users.created_at{%endcondition%}
+#   and {%condition state%}users.state{%endcondition%}
+# )
 view: agg_then_join_example {
   derived_table: {
     sql:
@@ -17,13 +89,13 @@ view: agg_then_join_example {
 with
 --prep tables... need calculations to be performed here so we can simply refer to column names below
 events_x as (
-  select *, DATE_TRUNC('month', CONVERT_TIMEZONE('UTC', 'America/New_York', created_at )) as month from public.events
-  where {%condition month%}events.created_at{%endcondition%}
-  and {%condition state%}events.state{%endcondition%}
+  select * from ${events_ndt.SQL_TABLE_NAME}
+  where {%if month._is_filtered%}{%condition month%}events_ndt.month{%endcondition%}{%endif%}
+  {%if state._is_filtered%}and {%condition state%}events_ndt.state{%endcondition%}{%endif%}
 )
-,users_x as (select *, DATE_TRUNC('month', CONVERT_TIMEZONE('UTC', 'America/New_York', created_at )) as month from public.users
-  where {%condition month%}users.created_at{%endcondition%}
-  and {%condition state%}users.state{%endcondition%}
+,users_x as (select * from ${users_ndt.SQL_TABLE_NAME}
+  where {%if month._is_filtered%}{%condition month%}users_ndt.month{%endcondition%}{%endif%}
+  {%if state._is_filtered%}and {%condition state%}users_ndt.state{%endcondition%}{%endif%}
 )
 
 {% assign source_table_1 = 'events_x'%}
@@ -31,8 +103,8 @@ events_x as (
 
 
 {%assign selected_dimensions =''%}
-{% if month._is_selected %}{%assign selected_dimensions = selected_dimensions | append: 'month,' %}{%endif%}
-{% if state._is_selected %}{%assign selected_dimensions = selected_dimensions | append: 'state,' %}{%endif%}
+{% if month._in_query %}{%assign selected_dimensions = selected_dimensions | append: 'month,' %}{%endif%}
+{% if state._in_query %}{%assign selected_dimensions = selected_dimensions | append: 'state,' %}{%endif%}
 {%assign selected_dimensions = selected_dimensions | split: "" | reverse | join: "" |replace_first:',','' | split: "" | reverse | join: ""%}
 
 
