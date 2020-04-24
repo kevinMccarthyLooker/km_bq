@@ -165,7 +165,6 @@ sum(events) as event_count,
 sum(users) as user_count
 from final_query
 group by {{selected_dimensions}}
-order by {{selected_dimensions}}
     ;;
   }
 
