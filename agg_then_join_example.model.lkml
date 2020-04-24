@@ -173,9 +173,7 @@ order by {{selected_dimensions}}
     type: date_month
     sql: ${TABLE}.month ;;
   }
-  dimension: state {
-    sql: {% if state._is_selected%}state{%else%}{%endif%} ;;
-  }
+  dimension: state {}
 
   measure: event_count {
     type: sum
