@@ -90,12 +90,20 @@ with
 --prep tables... need calculations to be performed here so we can simply refer to column names below
 events_x as (
   select * from ${events_ndt.SQL_TABLE_NAME}
-  where {%if month._is_filtered%}{%condition month%}events_ndt.month{%endcondition%}{%endif%}
+  where
+  {%if month._is_filtered%}{%condition month%}events_ndt.month{%endcondition%}{%endif%}
+  {%if city._is_filtered%}and {%condition state%}events_ndt.city{%endcondition%}{%endif%}
   {%if state._is_filtered%}and {%condition state%}events_ndt.state{%endcondition%}{%endif%}
+  {%if country._is_filtered%}and {%condition state%}events_ndt.country{%endcondition%}{%endif%}
+  {%if zip._is_filtered%}and {%condition state%}events_ndt.zip{%endcondition%}{%endif%}
 )
 ,users_x as (select * from ${users_ndt.SQL_TABLE_NAME}
-  where {%if month._is_filtered%}{%condition month%}users_ndt.month{%endcondition%}{%endif%}
+  where
+  {%if month._is_filtered%}{%condition month%}users_ndt.month{%endcondition%}{%endif%}
+  {%if city._is_filtered%}and {%condition state%}users_ndt.city{%endcondition%}{%endif%}
   {%if state._is_filtered%}and {%condition state%}users_ndt.state{%endcondition%}{%endif%}
+  {%if country._is_filtered%}and {%condition state%}users_ndt.country{%endcondition%}{%endif%}
+  {%if zip._is_filtered%}and {%condition state%}users_ndt.zip{%endcondition%}{%endif%}
 )
 
 {% assign source_table_1 = 'events_x'%}
@@ -104,7 +112,11 @@ events_x as (
 
 {%assign selected_dimensions =''%}
 {% if month._in_query %}{%assign selected_dimensions = selected_dimensions | append: 'month,' %}{%endif%}
+{% if city._in_query %}{%assign selected_dimensions = selected_dimensions | append: 'city,' %}{%endif%}
 {% if state._in_query %}{%assign selected_dimensions = selected_dimensions | append: 'state,' %}{%endif%}
+{% if country._in_query %}{%assign selected_dimensions = selected_dimensions | append: 'country,' %}{%endif%}
+{% if zip._in_query %}{%assign selected_dimensions = selected_dimensions | append: 'zip,' %}{%endif%}
+
 {%assign selected_dimensions = selected_dimensions | split: "" | reverse | join: "" |replace_first:',','' | split: "" | reverse | join: ""%}
 
 
@@ -168,11 +180,13 @@ group by {{selected_dimensions}}
     ;;
   }
 
-  dimension:month {
-    type: date_month
-    sql: ${TABLE}.month ;;
-  }
+  dimension: city {}
   dimension: state {}
+  dimension: country {}
+  dimension: zip {}
+  dimension: month {
+    type: date_month
+  }
 
   measure: event_count {
     type: sum
