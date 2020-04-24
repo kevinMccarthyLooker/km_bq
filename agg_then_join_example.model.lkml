@@ -173,7 +173,9 @@ order by {{selected_dimensions}}
     type: date_month
     sql: ${TABLE}.month ;;
   }
-  dimension: state {}
+  dimension: state {
+    sql: {% if state._is_selected%}state{%else%}{%endif%} ;;
+  }
 
   measure: event_count {
     type: sum
@@ -185,4 +187,5 @@ order by {{selected_dimensions}}
   }
 
 }
-explore: agg_then_join_example {}
+explore: agg_then_join_example {
+}
