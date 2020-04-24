@@ -1,14 +1,5 @@
 connection: "thelook_events_redshift"
 
-# --configure selected fields.  This would be driven by is_selected checks
-# {%assign selected_dimensions =
-# '
-# month,
-# state
-# '
-# %}
-
-
 view: agg_then_join_example {
   derived_table: {
     sql:
@@ -79,11 +70,7 @@ support
 , Final_Query as
 (
 select
--- events_data.*,
--- user_creation_data.*,
 {{selected_dimensions_coalesced}}
--- coalesce(events_data.city,user_creation_data.city) as city,
--- coalesce(events_data.country,user_creation_data.country) as country,
 {{source_table_1}}_data.events,
 {{source_table_2}}_data.users
 
