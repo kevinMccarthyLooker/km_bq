@@ -27,6 +27,7 @@ select 'prior' as version ;;
     end
     ;;
   }
+  #right(len(field),4)+1
   measure: user_created_count_current {
     type: count_distinct
     sql:  ${users.id};;

@@ -19,3 +19,17 @@
 - Define a QA process for Unit Testing any assets built by comparing them to the Legacy Tools. See more Data Validation Process
 
 - Document any challenges or risks to the process based on Legacy Tool specifics.
+
+<dl>
+  <dt>Definition list</dt>
+  <dd>
+  <p font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif;">test
+    </p>
+  </dd>
+
+  <dt>Markdown in HTML</dt>
+  <dd>Does *not* work **very** well. Use HTML <em>tags</em>.</dd>
+</dl>
+
+<p style="font-family:verdana;">The <code>style</code> attribute can override it, though.</p>
+<p style="font-family:courier;">The <code>style</code> attribute can override it, though.</p>
