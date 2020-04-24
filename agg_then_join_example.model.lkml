@@ -1,5 +1,14 @@
 connection: "thelook_events_redshift"
 
+# --configure selected fields.  This would be driven by is_selected checks
+# {%assign selected_dimensions =
+# '
+# month,
+# state
+# '
+# %}
+
+
 view: agg_then_join_example {
   derived_table: {
     sql:
@@ -22,13 +31,11 @@ events_x as (select *, TO_CHAR(DATE_TRUNC('month', CONVERT_TIMEZONE('UTC', 'Amer
 {% assign source_table_2 = 'users_x'%}
 
 
---configure selected fields.  This would be driven by is_selected checks
-{%assign selected_dimensions =
-'
-month,
-state
-'
-%}
+{%assign selected_dimensions =''%}
+{% if month._is_selected %}{%assign selected_dimensions = selected_dimensions | append: 'month,' %}{%endif%}
+{% if state._is_selected %}{%assign selected_dimensions = selected_dimensions | append: 'state,' %}{%endif%}
+{%assign selected_dimensions = selected_dimensions | split: "" | reverse | join: "" |replace_first:',','' | split: "" | reverse | join: ""%}
+
 
 --processing...
 {%assign selected_dimensions_stripped = selected_dimensions | strip_newlines %}
@@ -96,5 +103,16 @@ order by {{selected_dimensions}}
   }
 
   dimension:month {}
+  dimension: state {}
+
+  measure: event_count {
+    type: sum
+    sql: ${TABLE}.event_count ;;
+  }
+  measure: user_count {
+    type: sum
+    sql: ${TABLE}.user_count ;;
+  }
+
 }
 explore: agg_then_join_example {}
