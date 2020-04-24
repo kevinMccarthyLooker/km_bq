@@ -13,10 +13,18 @@ view: agg_then_join_example {
 -- '
 
 --
+--events_x as (select *, DATE_TRUNC('month', CONVERT_TIMEZONE('UTC', 'America/New_York', created_at )) as month from public.events where created_at > '2020-01-02')
 with
 --prep tables... need calculations to be performed here so we can simply refer to column names below
-events_x as (select *, TO_CHAR(DATE_TRUNC('month', CONVERT_TIMEZONE('UTC', 'America/New_York', created_at )), 'YYYY-MM') as month from public.events where created_at > '2020-01-02')
-,users_x as (select *, TO_CHAR(DATE_TRUNC('month', CONVERT_TIMEZONE('UTC', 'America/New_York', created_at )), 'YYYY-MM') as month from public.users where created_at > '2020-01-02')
+events_x as (
+  select *, DATE_TRUNC('month', CONVERT_TIMEZONE('UTC', 'America/New_York', created_at )) as month from public.events
+  where {%condition month%}events.created_at{%endcondition%}
+  and {%condition state%}events.state{%endcondition%}
+)
+,users_x as (select *, DATE_TRUNC('month', CONVERT_TIMEZONE('UTC', 'America/New_York', created_at )) as month from public.users
+  where {%condition month%}users.created_at{%endcondition%}
+  and {%condition state%}users.state{%endcondition%}
+)
 
 {% assign source_table_1 = 'events_x'%}
 {% assign source_table_2 = 'users_x'%}
@@ -89,7 +97,10 @@ order by {{selected_dimensions}}
     ;;
   }
 
-  dimension:month {}
+  dimension:month {
+    type: date_month
+    sql: ${TABLE}.month ;;
+  }
   dimension: state {}
 
   measure: event_count {
