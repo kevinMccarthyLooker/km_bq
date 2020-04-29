@@ -11,13 +11,16 @@ view: ndt {
   derived_table: {
     explore_source: test { # explore_source: original_view {
       column: city {field:original_view.city} # column: foo {}
+      derived_column: rank_among_filtered_cities {sql:row_number() over();;}
       bind_filters: {
         from_field: sql_dt.bar
         to_field: original_view.city # to_field: original_view.bar
       }
+
     }
   }
   dimension: city {hidden:yes} # dimension: foo {}
+  dimension: rank_among_filtered_cities {hidden:yes}
 }
 
 view: sql_dt {
@@ -25,6 +28,7 @@ view: sql_dt {
     sql: SELECT * FROM ${ndt.SQL_TABLE_NAME} ;;
   }
   dimension: city {}#dimension: foo {}
+  dimension: rank_among_filtered_cities {}
   filter: bar {}
 }
 
