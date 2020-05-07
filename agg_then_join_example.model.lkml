@@ -1,3 +1,4 @@
+##
 connection: "thelook_events_redshift"
 
 view: users {

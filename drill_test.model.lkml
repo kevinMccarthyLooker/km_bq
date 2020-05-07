@@ -18,4 +18,6 @@ view: users {
   }
 }
 
-explore: users {}
+explore: users {
+  label: "test label2"
+}
