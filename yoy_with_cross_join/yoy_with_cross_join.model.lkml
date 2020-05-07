@@ -29,20 +29,27 @@ select 'prior' as version ;;
     datatype: date
     timeframes: [date,month,year]
     sql:
-    case when ${version}='prior' then date_add(${users.created_date}, INTERVAL {{number._parameter_value}} {{timeframe._parameter_value}})
+    case when ${version}='prior' then date_add(${users.created_date}, INTERVAL {{timeframes_to_offset_by._parameter_value}}
+    {% if the_date._in_query %} Day
+    {% elsif the_month._in_query %} Month
+    {% elsif the_year._in_query %} Year
+    {%endif%}
+    )
     else ${users.created_date}
     end
     ;;
+    #{{offset_timeframe._parameter_value}}
   }
-  parameter: number {
+
+#   parameter: offset_timeframe {
+#     type: unquoted
+#     allowed_value: {value:"Year"}
+#     allowed_value: {value:"Month"}
+#     default_value: "Year"
+#   }
+  parameter: timeframes_to_offset_by {
     type:number
     default_value: "1"
-  }
-  parameter: timeframe {
-    type: unquoted
-    allowed_value: {value:"Year"}
-    allowed_value: {value:"Month"}
-    default_value: "Year"
   }
   measure: validation_dates {
     type: string
