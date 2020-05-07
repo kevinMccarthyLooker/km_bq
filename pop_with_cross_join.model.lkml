@@ -8,15 +8,15 @@ include: "/yoy_with_cross_join/users.view.lkml"                # include all vie
 #https://profservices.dev.looker.com/explore/yoy_with_cross_join/users?qid=o2zLlGqBxnfFmdWhlDXlHR&toggle=fil
 explore: users {
   #join to any explore, just need to update which field we refer to in YOY support (this could be a tny template)
-  join: yoy_support {
+  join: pop_support {
     type:cross
     relationship:one_to_one
     #could do better/cleaarner here... but this is to not project today's data into the future and report rows of data a 'prior' for that future period
-    sql_where: ${yoy_support.the_date}<(select max((CAST(TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', users.created_at , 'America/New_York')) AS DATE))) from `lookerdata.thelook.users` AS users);;
+    sql_where: ${pop_support.the_date}<(select max((CAST(TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', users.created_at , 'America/New_York')) AS DATE))) from `lookerdata.thelook.users` AS users);;
     }
 }
 
-view: yoy_support {
+view: pop_support {
   derived_table: {
     sql:
 select 'current' as version
