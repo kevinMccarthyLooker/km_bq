@@ -7,6 +7,7 @@ include: "/yoy_with_cross_join/users.view.lkml"                # include all vie
 #check out this explore
 #https://profservices.dev.looker.com/explore/yoy_with_cross_join/users?qid=o2zLlGqBxnfFmdWhlDXlHR&toggle=fil
 explore: users {
+  #join to any explore, just need to update which field we refer to in YOY support (this could be a tny template)
   join: yoy_support {
     type:cross
     relationship:one_to_one
