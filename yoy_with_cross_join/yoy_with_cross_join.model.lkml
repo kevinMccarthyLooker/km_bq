@@ -40,7 +40,7 @@ select 'prior' as version ;;
     ;;
     #{{offset_timeframe._parameter_value}}
   }
-
+#removed this in favor of in_query magic
 #   parameter: offset_timeframe {
 #     type: unquoted
 #     allowed_value: {value:"Year"}
