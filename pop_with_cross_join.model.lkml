@@ -10,23 +10,20 @@ include: "users.view.lkml"
 #check out this explore
 #https://profservices.dev.looker.com/explore/pop_with_cross_join/users?qid=lDnFRgp9jlOaprqY0XGlKu&toggle=fil
 explore: users {
-  #join to any explore, just need to update which field we refer to in YOY support (this could be a tny template)
-  join: pop_support {
-    from: pop_support_users
+  #join to any explore, just need to update which field we refer to in YOY
+  join: pop_support_users {
     type:cross
     relationship:one_to_one
-    sql_where: ${pop_support.the_date}<=(select max(${pop_support.input__the_date_to_pop}) from {{pop_support.input__the_original_source_table._sql}} AS {{pop_support.input__the_original_source_table_view_name._sql}});;
-    }
+    sql_where: ${pop_support_users.the_date}<=(select max(${pop_support_users.input__the_date_to_pop}) from {{pop_support_users.input__the_original_source_table._sql}} AS {{pop_support_users.input__the_original_source_table_view_name._sql}});;
+  }
 }
 view: pop_support_users {
   extends: [pop_support]
-
   dimension: input__the_date_to_pop {
     type: date
-    #input the desired date field to use for period comparison
-    sql: ${users.created_date::date} ;;
+    sql: ${users.created_date::date} ;; #input the desired date field to use for period comparison.  fully qualify with view name (view name used in the original explore)
   }
-  #for excluding most recent period being presented forward beyond the last original data (causes confusing UI)...
+  ##{for excluding most recent period being presented forward beyond the last original data (causes confusing UI)...
   #would like to improve these or make it automatic, but haven't found a way yet.
   dimension: input__the_original_source_table_view_name {sql: users ;;}
   dimension: input__the_original_source_table {
@@ -38,10 +35,10 @@ view: pop_support_users {
     {%endif%}
     ;;
   }
-
+  ## }end... for excluding most recent period
 }
 
-###don't need to modify
+###Implementers don't need to modify the code below... ####
 view: pop_support {
   dimension: input__the_date_to_pop {# hidden:yes #hide later
     convert_tz: no
