@@ -1,5 +1,9 @@
 view: users {
-  sql_table_name: `lookerdata.thelook.users`
+  sql_table_name:
+  {% if _dialect._name == 'bigquery_standard_sql' %}`lookerdata.thelook.users`
+  {% elsif _dialect._name == 'redshift'%}public.users
+  {% elsif _dialect._name == 'snowflake'%}public.users
+  {%endif%}
     ;;
   drill_fields: [id]
 

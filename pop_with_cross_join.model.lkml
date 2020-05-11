@@ -1,7 +1,10 @@
-connection: "biquery_publicdata_standard_sql"
+# connection: "biquery_publicdata_standard_sql"
+# connection: "thelook_events_redshift"
+connection: "snowlooker"
 
 #no adjustments to the standard users view
-include: "/yoy_with_cross_join/users.view.lkml"                # include all views in the views/ folder in this project
+# include: "/yoy_with_cross_join/users.view.lkml"                # include all views in the views/ folder in this project
+include: "users.view.lkml"
 
 #extremely simple to use with 'Version' as a pivot
 #check out this explore
@@ -20,23 +23,32 @@ view: pop_support_users {
 
   dimension: input__the_date_to_pop {
     type: date
-    #use the desired date field
+    #input the desired date field to use for period comparison
     sql: ${users.created_date::date} ;;
   }
-  dimension: input__the_original_source_table {sql: `lookerdata.thelook.users` ;;}
+  #for excluding most recent period being presented forward beyond the last original data (causes confusing UI)...
+  #would like to improve these or make it automatic, but haven't found a way yet.
   dimension: input__the_original_source_table_view_name {sql: users ;;}
+  dimension: input__the_original_source_table {
+    #looker sample data lives in two different table names for our diffferent dialects
+    sql:
+    {% if _dialect._name == 'bigquery_standard_sql' %}`lookerdata.thelook.users`
+    {% elsif _dialect._name == 'redshift'%}public.users
+    {% elsif _dialect._name == 'snowflake'%}public.users
+    {%endif%}
+    ;;
+  }
+
 }
 
 ###don't need to modify
 view: pop_support {
-  dimension: input__the_date_to_pop {
-    # hidden:yes #hide later
+  dimension: input__the_date_to_pop {# hidden:yes #hide later
     convert_tz: no
-    # type: date
     sql: WILL BE OVERRIDEN IN EXTENSION ;;
   }
-  dimension: input__the_original_source_table {sql: `lookerdata.thelook.users` ;; }# hidden:yes #hide later
-  dimension: input__the_original_source_table_view_name {sql: users ;; }# hidden:yes #hide later
+  dimension: input__the_original_source_table {sql: WILL BE OVERRIDEN IN EXTENSION ;; }# hidden:yes #hide later
+  dimension: input__the_original_source_table_view_name {sql: WILL BE OVERRIDEN IN EXTENSION ;;}# hidden:yes #hide later
 
   derived_table: {
     sql:
@@ -51,14 +63,35 @@ select 'prior' as version ;;
     convert_tz: no
     timeframes: [date,month,year]
     sql:
-    case when ${version}='prior' then date_add(${input__the_date_to_pop}, INTERVAL {{timeframes_to_offset_by._parameter_value}}
+case when ${version}='prior' then
+--bigquery_standard_sql verion
+{%if _dialect._name == 'bigquery_standard_sql'%}
+    date_add(${input__the_date_to_pop}, INTERVAL {{timeframes_to_offset_by._parameter_value}}
     {% if the_date._in_query %} Day
     {% elsif the_month._in_query %} Month
     {% elsif the_year._in_query %} Year
     {%endif%}
     )
-    else ${input__the_date_to_pop}
-    end
+{%elsif _dialect._name == 'redshift'%}
+    dateadd(
+    {% if the_date._in_query %} Day
+    {% elsif the_month._in_query %} Month
+    {% elsif the_year._in_query %} Year
+    {%endif%}
+    ,{{timeframes_to_offset_by._parameter_value}},${input__the_date_to_pop}
+    )
+{%elsif _dialect._name == 'snowflake'%}
+    dateadd(
+    {% if the_date._in_query %} Day
+    {% elsif the_month._in_query %} Month
+    {% elsif the_year._in_query %} Year
+    {%endif%}
+    ,{{timeframes_to_offset_by._parameter_value}},${input__the_date_to_pop}
+    )
+{%else%} UNSUPPORTED DIALECT!  UPDATE WITH LOGIC SIMILAR TO THAT SHOWN ABOVE FOR OTHER DIALECTS
+{%endif%}
+else ${input__the_date_to_pop}
+end
     ;;
   }
 
