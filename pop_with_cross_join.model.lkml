@@ -12,7 +12,9 @@ explore: users {
     type:cross
     relationship:one_to_one
     #could do better/cleaarner here... but this is to not project today's data into the future and report rows of data a 'prior' for that future period
-    sql_where: ${pop_support.the_date}<(select max((CAST(TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', users.created_at , 'America/New_York')) AS DATE))) from `lookerdata.thelook.users` AS users);;
+
+#     sql_where: ${pop_support.the_date}<(select max((CAST(TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', users.created_at , 'America/New_York')) AS DATE))) from `lookerdata.thelook.users` AS users);;
+
     }
 }
 
