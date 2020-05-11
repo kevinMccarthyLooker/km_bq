@@ -12,18 +12,32 @@ explore: users {
     from: pop_support_users
     type:cross
     relationship:one_to_one
-    #could do better/cleaarner here... but this is to not project today's data into the future and report rows of data a 'prior' for that future period
-    sql_where: ${pop_support.the_date}<(select max(${pop_support.the_date_for_sql_always_where}) from `lookerdata.thelook.users` AS users);;
+    sql_where: ${pop_support.the_date}<=(select max(${pop_support.input__the_date_to_pop}) from {{pop_support.input__the_original_source_table._sql}} AS {{pop_support.input__the_original_source_table_view_name._sql}});;
     }
 }
 view: pop_support_users {
   extends: [pop_support]
-  dimension: the_date_for_sql_always_where {
+
+  dimension: input__the_date_to_pop {
     type: date
-    sql: ${users.created_date::datetime} ;;
+    #use the desired date field
+    sql: ${users.created_date::date} ;;
   }
+  dimension: input__the_original_source_table {sql: `lookerdata.thelook.users` ;;}
+  dimension: input__the_original_source_table_view_name {sql: users ;;}
 }
+
+###don't need to modify
 view: pop_support {
+  dimension: input__the_date_to_pop {
+    # hidden:yes #hide later
+    convert_tz: no
+    # type: date
+    sql: WILL BE OVERRIDEN IN EXTENSION ;;
+  }
+  dimension: input__the_original_source_table {sql: `lookerdata.thelook.users` ;; }# hidden:yes #hide later
+  dimension: input__the_original_source_table_view_name {sql: users ;; }# hidden:yes #hide later
+
   derived_table: {
     sql:
 select 'current' as version
@@ -34,19 +48,20 @@ select 'prior' as version ;;
   dimension_group: the {
     type: time
     datatype: date
+    convert_tz: no
     timeframes: [date,month,year]
     sql:
-    case when ${version}='prior' then date_add(${users.created_date}, INTERVAL {{timeframes_to_offset_by._parameter_value}}
+    case when ${version}='prior' then date_add(${input__the_date_to_pop}, INTERVAL {{timeframes_to_offset_by._parameter_value}}
     {% if the_date._in_query %} Day
     {% elsif the_month._in_query %} Month
     {% elsif the_year._in_query %} Year
     {%endif%}
     )
-    else ${users.created_date}
+    else ${input__the_date_to_pop}
     end
     ;;
-    #{{offset_timeframe._parameter_value}}
   }
+
 #removed this in favor of in_query magic
 #   parameter: offset_timeframe {
 #     type: unquoted
@@ -60,6 +75,6 @@ select 'prior' as version ;;
   }
   measure: validation_dates {
     type: string
-    sql: 'actual date range included: '|| min(${users.created_date}) || ' to ' || max(${users.created_date}) ;;
+    sql: 'actual date range included: '|| min(${input__the_date_to_pop}) || ' to ' || max(${input__the_date_to_pop}) ;;
   }
 }
