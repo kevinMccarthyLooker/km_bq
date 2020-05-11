@@ -9,13 +9,20 @@ include: "/yoy_with_cross_join/users.view.lkml"                # include all vie
 explore: users {
   #join to any explore, just need to update which field we refer to in YOY support (this could be a tny template)
   join: pop_support {
+    from: pop_support_users
     type:cross
     relationship:one_to_one
     #could do better/cleaarner here... but this is to not project today's data into the future and report rows of data a 'prior' for that future period
-    sql_where: ${pop_support.the_date}<(select max((CAST(TIMESTAMP(FORMAT_TIMESTAMP('%F %H:%M:%E*S', users.created_at , 'America/New_York')) AS DATE))) from `lookerdata.thelook.users` AS users);;
+    sql_where: ${pop_support.the_date}<(select max(${pop_support.the_date_for_sql_always_where}) from `lookerdata.thelook.users` AS users);;
     }
 }
-
+view: pop_support_users {
+  extends: [pop_support]
+  dimension: the_date_for_sql_always_where {
+    type: date
+    sql: ${users.created_date::datetime} ;;
+  }
+}
 view: pop_support {
   derived_table: {
     sql:
