@@ -8,7 +8,7 @@ include: "users.view.lkml"
 
 #extremely simple to use with 'Version' as a pivot
 #check out this explore
-#https://profservices.dev.looker.com/explore/yoy_with_cross_join/users?qid=o2zLlGqBxnfFmdWhlDXlHR&toggle=fil
+#https://profservices.dev.looker.com/explore/pop_with_cross_join/users?qid=lDnFRgp9jlOaprqY0XGlKu&toggle=fil
 explore: users {
   #join to any explore, just need to update which field we refer to in YOY support (this could be a tny template)
   join: pop_support {
@@ -63,33 +63,18 @@ select 'prior' as version ;;
     convert_tz: no
     timeframes: [date,month,year]
     sql:
-case when ${version}='prior' then
---bigquery_standard_sql verion
-{%if _dialect._name == 'bigquery_standard_sql'%}
-    date_add(${input__the_date_to_pop}, INTERVAL {{timeframes_to_offset_by._parameter_value}}
-    {% if the_date._in_query %} Day
-    {% elsif the_month._in_query %} Month
-    {% elsif the_year._in_query %} Year
-    {%endif%}
-    )
-{%elsif _dialect._name == 'redshift'%}
-    dateadd(
-    {% if the_date._in_query %} Day
-    {% elsif the_month._in_query %} Month
-    {% elsif the_year._in_query %} Year
-    {%endif%}
-    ,{{timeframes_to_offset_by._parameter_value}},${input__the_date_to_pop}
-    )
-{%elsif _dialect._name == 'snowflake'%}
-    dateadd(
-    {% if the_date._in_query %} Day
-    {% elsif the_month._in_query %} Month
-    {% elsif the_year._in_query %} Year
-    {%endif%}
-    ,{{timeframes_to_offset_by._parameter_value}},${input__the_date_to_pop}
-    )
-{%else%} UNSUPPORTED DIALECT!  UPDATE WITH LOGIC SIMILAR TO THAT SHOWN ABOVE FOR OTHER DIALECTS
+{% assign timeframe_to_offset_by = 'Day'%}
+{% if the_date._in_query %} {% assign timeframe_to_offset_by = 'Day'%}
+{% elsif the_month._in_query %} {% assign timeframe_to_offset_by = 'Month'%}
+{% elsif the_year._in_query %} {% assign timeframe_to_offset_by = 'Year'%}
 {%endif%}
+
+case when ${version}='prior' then
+  {%if _dialect._name == 'bigquery_standard_sql'%}date_add(${input__the_date_to_pop}, INTERVAL {{timeframes_to_offset_by._parameter_value}} {{timeframe_to_offset_by}})
+  {%elsif _dialect._name == 'redshift'%}dateadd({{timeframe_to_offset_by}},{{timeframes_to_offset_by._parameter_value}},${input__the_date_to_pop})
+  {%elsif _dialect._name == 'snowflake'%}dateadd({{timeframe_to_offset_by}},{{timeframes_to_offset_by._parameter_value}},${input__the_date_to_pop})
+  {%else%} UNSUPPORTED DIALECT!  UPDATE WITH LOGIC SIMILAR TO THAT SHOWN ABOVE FOR OTHER DIALECTS
+  {%endif%}
 else ${input__the_date_to_pop}
 end
     ;;
