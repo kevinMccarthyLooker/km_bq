@@ -40,12 +40,12 @@ view: pop_support_users {
 
 ###Implementers don't need to modify the code below... ####
 view: pop_support {
-  dimension: input__the_date_to_pop {# hidden:yes #hide later
+  dimension: input__the_date_to_pop {hidden:yes #hide later
     convert_tz: no
     sql: WILL BE OVERRIDEN IN EXTENSION ;;
   }
-  dimension: input__the_original_source_table {sql: WILL BE OVERRIDEN IN EXTENSION ;; }# hidden:yes #hide later
-  dimension: input__the_original_source_table_view_name {sql: WILL BE OVERRIDEN IN EXTENSION ;;}# hidden:yes #hide later
+  dimension: input__the_original_source_table {sql: WILL BE OVERRIDEN IN EXTENSION ;; hidden:yes}# hidden:yes #hide later
+  dimension: input__the_original_source_table_view_name {sql: WILL BE OVERRIDEN IN EXTENSION ;; hidden:yes}# hidden:yes #hide later
 
   derived_table: {
     sql:
