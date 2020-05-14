@@ -1,9 +1,5 @@
-# connection: "biquery_publicdata_standard_sql"
-# connection: "thelook_events_redshift"
-connection: "snowlooker"
-#currently only works with snowlfake cause of the hardcoded timezone handling
-
-include: "users.view.lkml"
+include: "/users.view.lkml"
+include: "/POP_With_Refinements/users_explore.lkml"
 view: +users {
   dimension_group: created {
     timeframes: [date,week,month,quarter,year] #other timeframes like time or day of year not supported
@@ -61,70 +57,70 @@ view: pop_support_user_created_date {
   dimension: version {hidden:yes}
 }
 
-explore: users {
+explore: +users {
   join: pop_support_user_created_date {
     relationship:one_to_one
     sql: left join pop_support_user_created_date on ${users.created_date}<=(select max(CONVERT_TIMEZONE('UTC', 'America/New_York', cast(created_at as timestamp_ntz))) as max_created from public.users);;
   }
 
 #queries to get users started with pop
-  query: week_over_week{
+  query: user_created_week_over_week{
     dimensions: [created_week,created_date_current_vs_prior_period]
     pivots: [created_date_current_vs_prior_period]
     filters: [users.created_date_pop_offset_timeframe_size: "Week", users.created_date_timeframes_to_offset_by: "1"]
     measures: [count]
   }
-  query: month_over_month{
+  query: user_created_month_over_month{
     dimensions: [created_month,created_date_current_vs_prior_period]
     pivots: [created_date_current_vs_prior_period]
     filters: [users.created_date_pop_offset_timeframe_size: "Month", users.created_date_timeframes_to_offset_by: "1"]
     measures: [count]
   }
-  query: quarter_over_quarter{
+  query: user_created_quarter_over_quarter{
     dimensions: [created_quarter,created_date_current_vs_prior_period]
     pivots: [created_date_current_vs_prior_period]
     filters: [users.created_date_pop_offset_timeframe_size: "Quarter", users.created_date_timeframes_to_offset_by: "1"]
     measures: [count]
   }
-  query: year_over_year{
+  query: user_created_year_over_year{
     dimensions: [created_year,created_date_current_vs_prior_period]
     pivots: [created_date_current_vs_prior_period]
     filters: [users.created_date_pop_offset_timeframe_size: "Year", users.created_date_timeframes_to_offset_by: "1"]
     measures: [count]
   }
-  query: daily_vs_one_week_prior{
+  query: user_created_daily_vs_one_week_prior{
     dimensions: [created_date,created_date_current_vs_prior_period]
     pivots: [created_date_current_vs_prior_period]
     filters: [users.created_date_pop_offset_timeframe_size: "Week", users.created_date_timeframes_to_offset_by: "1"]
     measures: [count]
   }
-  query: daily_vs_one_year_prior__calendar_date{
+  query: user_created_daily_vs_one_year_prior__calendar_date{
     dimensions: [created_date,created_date_current_vs_prior_period]
     pivots: [created_date_current_vs_prior_period]
     filters: [users.created_date_pop_offset_timeframe_size: "Year", users.created_date_timeframes_to_offset_by: "1"]
     measures: [count]
   }
-  query: daily_vs_one_year_prior__52_weeks{
+  query: user_created_daily_vs_one_year_prior__52_weeks{
     dimensions: [created_date,created_date_current_vs_prior_period]
     pivots: [created_date_current_vs_prior_period]
     filters: [users.created_date_pop_offset_timeframe_size: "Week", users.created_date_timeframes_to_offset_by: "52"]
     measures: [count]
   }
-  query: weekly_vs_one_year_prior{
+  query: user_created_weekly_vs_one_year_prior{
     description: "group data by week and compare to the 7 days that are one year prior to that week's days"
     dimensions: [created_week,created_date_current_vs_prior_period]
     pivots: [created_date_current_vs_prior_period]
     filters: [users.created_date_pop_offset_timeframe_size: "Year", users.created_date_timeframes_to_offset_by: "1"]
     measures: [count]
   }
-  query: weekly_vs_52_weeks_prior{
+  query: user_created_weekly_vs_52_weeks_prior{
     description: "group data by week and compare to the week that was 52 weeks prior to that week. Differs slightly from YOY by calendar days"
     dimensions: [created_week,created_date_current_vs_prior_period]
     pivots: [created_date_current_vs_prior_period]
     filters: [users.created_date_pop_offset_timeframe_size: "Week", users.created_date_timeframes_to_offset_by: "52"]
     measures: [count]
   }
-  query: monthly_vs_12_months_prior{
+  query: user_created_monthly_vs_12_months_prior{
     description: "group data by week and compare to the week that was 52 weeks prior to that week. Differs slightly from YOY by calendar days"
     dimensions: [created_month,created_date_current_vs_prior_period]
     pivots: [created_date_current_vs_prior_period]
