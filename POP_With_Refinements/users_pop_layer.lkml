@@ -1,11 +1,19 @@
 include: "/users.view.lkml"
 include: "/POP_With_Refinements/users_explore.lkml"
 view: +users {
+  dimension: table2 {
+    sql:{% if pop_support_user_created_date._in_query %}{%assign out = "case when version = 'current' then users"%}{%else%}{%assign out = "users"%}{%endif%}{{out}};;
+    }
+  dimension: field_end {
+#     sql:{% if pop_support_user_created_date._in_query %}{%assign output = 'else null end'%}
+#       {%else%}{%assign output = ''%}{%endif%}{{output}};;
+}
   dimension_group: created {
     timeframes: [date,week,month,quarter,year] #other timeframes like time or day of year not supported
     convert_tz: no # timeszones needed to be pushed down before offsetting dates.  I pasted the timezone conversion logic directly for now...
+#     {% if pop_support_user_created_date.version._in_query %}
     sql:
-    {% if pop_support_user_created_date.version._in_query %}
+    {% if pop_support_user_created_date._in_query %}
     case when pop_support_user_created_date.version='prior' then
     {%if _dialect._name == 'bigquery_standard_sql'%}date_add(CONVERT_TIMEZONE('UTC', 'America/New_York', cast(${EXTENDED} as timestamp_ntz)), INTERVAL {{created_date_timeframes_to_offset_by._parameter_value}} {{created_date_pop_offset_timeframe_size._parameter_value}})
     {%elsif _dialect._name == 'redshift'%}dateadd({{created_date_pop_offset_timeframe_size._parameter_value}},{{created_date_timeframes_to_offset_by._parameter_value}},CONVERT_TIMEZONE('UTC', 'America/New_York', cast(${EXTENDED} as timestamp_ntz)))
@@ -55,12 +63,26 @@ view: pop_support_user_created_date {
     select 'prior' as version ;;
   }
   dimension: version {hidden:yes}
-}
+}#
 
+view: users_measures_prior {
+  sql_table_name: users ;;
+  dimension: table2 {sql:case when version = 'prior' then users;;}
+  dimension: field_end {type:date_raw sql:--
+    else null end;;}
+  extends: [users]
+}
 explore: +users {
   join: pop_support_user_created_date {
+
     relationship:one_to_one
     sql: left join pop_support_user_created_date on ${users.created_date}<=(select max(CONVERT_TIMEZONE('UTC', 'America/New_York', cast(created_at as timestamp_ntz))) as max_created from public.users);;
+  }
+  join: users_measures_prior {
+    required_joins: [pop_support_user_created_date]
+    fields: [users_measures_prior.all_measures*]
+    sql:  ;;
+    relationship: one_to_one
   }
 
 #queries to get users started with pop
