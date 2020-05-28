@@ -1,9 +1,9 @@
 include: "/users.view.lkml"
 include: "/POP_With_Refinements/users_explore.lkml"
 view: +users {
-  dimension: table2 {
-    sql:{% if pop_support_user_created_date._in_query %}{%assign out = "case when version = 'current' then users"%}{%else%}{%assign out = "users"%}{%endif%}{{out}};;
-    }
+#   dimension: table2 {
+#     sql:{% if pop_support_user_created_date._in_query %}{%assign out = "case when version = 'current' then users"%}{%else%}{%assign out = "users"%}{%endif%}{{out}};;
+#     }
   dimension: field_end {
 #     sql:{% if pop_support_user_created_date._in_query %}{%assign output = 'else null end'%}
 #       {%else%}{%assign output = ''%}{%endif%}{{output}};;

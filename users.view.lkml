@@ -1,6 +1,18 @@
 view: users {
   dimension: primary_key {primary_key:yes sql:${id};;}
-  dimension: table2 {sql:${TABLE} ;;}
+#   dimension: table2 {sql:${TABLE} ;;}
+  dimension: table2 {sql:
+  {%assign table_out = '`lookerdata.thelook.users`' %}
+  {% if _dialect._name == 'bigquery_standard_sql' %}{%assign table_out = '`lookerdata.thelook.users`' %}
+  {% elsif _dialect._name == 'redshift'%}{%assign table_out = 'public.users'%}
+  {% elsif _dialect._name == 'snowflake'%}{%assign table_out = 'public.users'%}
+  {%endif%} {{table_out}};;}
+  dimension: table_no_schema {sql:
+    {%assign table_out = '`users`' %}
+    {% if _dialect._name == 'bigquery_standard_sql' %}{%assign table_out = '`users`' %}
+    {% elsif _dialect._name == 'redshift'%}{%assign table_out = 'users'%}
+    {% elsif _dialect._name == 'snowflake'%}{%assign table_out = 'users'%}
+    {%endif%} {{table_out}};;}
   # dimension: table3 {sql:{% assign t3 = 'tt123' %};;}
   dimension: field_end { sql:--;;}
   dimension: field_end_length {sql:;;}
@@ -15,7 +27,7 @@ view: users {
 
   dimension: id {
     type: number
-    sql: {{users.table2._sql}}.id ;;
+    sql: {{users.table_no_schema._sql}}.id;;
   }
 
   dimension: age {
@@ -30,13 +42,13 @@ view: users {
 
   dimension: city {
     type: string
-    sql: {{users.table2._sql}}.city ;;
+    sql: {{users.table_no_schema._sql}}.city ;;
   }
 
   dimension: country {
     type: string
     map_layer_name: countries
-    sql: {{users.table2._sql}}.country ;;
+    sql: {{users.table_no_schema._sql}}.country ;;
   }
 
   dimension_group: created {
@@ -55,37 +67,37 @@ view: users {
 
   dimension: email {
     type: string
-    sql: {{users.table2._sql}}.email ;;
+    sql: {{users.table_no_schema._sql}}.email ;;
   }
 
   dimension: first_name {
     type: string
-    sql: {{users.table2._sql}}.first_name ;;
+    sql: {{users.table_no_schema._sql}}.first_name ;;
   }
 
   dimension: gender {
     type: string
-    sql: {{users.table2._sql}}.gender ;;
+    sql: {{users.table_no_schema._sql}}.gender ;;
   }
 
   dimension: last_name {
     type: string
-    sql: {{users.table2._sql}}.last_name ;;
+    sql: {{users.table_no_schema._sql}}.last_name ;;
   }
 
   dimension: referral_source {
     type: string
-    sql: {{users.table2._sql}}.referral_source ;;
+    sql: {{users.table_no_schema._sql}}.referral_source ;;
   }
 
   dimension: state {
     type: string
-    sql: {{users.table2._sql}}.state ;;
+    sql: {{users.table_no_schema._sql}}.state ;;
   }
 
   dimension: zip {
     type: zipcode
-    sql: {{users.table2._sql}}.zip ;;
+    sql: {{users.table_no_schema._sql}}.zip ;;
   }
 
   measure: count {

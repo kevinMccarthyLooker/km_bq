@@ -1,28 +1,34 @@
 view: events {
-  sql_table_name: "PUBLIC"."EVENTS"
-    ;;
+  # sql_table_name: "PUBLIC"."EVENTS"
+  #   ;;
+  sql_table_name:
+  {% if _dialect._name == 'bigquery_standard_sql' %}`lookerdata.thelook_event_extract_201701.events`
+  {% elsif _dialect._name == 'redshift'%}public.events
+  {% elsif _dialect._name == 'snowflake'%}public.events
+  {%endif%}
+  ;;
   drill_fields: [id]
 
   dimension: id {
     primary_key: yes
     type: number
-    sql: ${TABLE}."ID" ;;
+    sql: ${TABLE}.ID ;;
   }
 
   dimension: browser {
     type: string
-    sql: ${TABLE}."BROWSER" ;;
+    sql: ${TABLE}.BROWSER ;;
   }
 
   dimension: city {
     type: string
-    sql: ${TABLE}."CITY" ;;
+    sql: ${TABLE}.CITY ;;
   }
 
   dimension: country {
     type: string
     map_layer_name: countries
-    sql: ${TABLE}."COUNTRY" ;;
+    sql: ${TABLE}.COUNTRY ;;
   }
 
   dimension_group: created {
@@ -36,67 +42,67 @@ view: events {
       quarter,
       year
     ]
-    sql: ${TABLE}."CREATED_AT" ;;
+    sql: ${TABLE}.CREATED_AT ;;
   }
 
   dimension: event_type {
     type: string
-    sql: ${TABLE}."EVENT_TYPE" ;;
+    sql: ${TABLE}.EVENT_TYPE ;;
   }
 
   dimension: ip_address {
     type: string
-    sql: ${TABLE}."IP_ADDRESS" ;;
+    sql: ${TABLE}.IP_ADDRESS ;;
   }
 
   dimension: latitude {
     type: number
-    sql: ${TABLE}."LATITUDE" ;;
+    sql: ${TABLE}.LATITUDE ;;
   }
 
   dimension: longitude {
     type: number
-    sql: ${TABLE}."LONGITUDE" ;;
+    sql: ${TABLE}.LONGITUDE ;;
   }
 
   dimension: os {
     type: string
-    sql: ${TABLE}."OS" ;;
+    sql: ${TABLE}.OS ;;
   }
 
   dimension: sequence_number {
     type: number
-    sql: ${TABLE}."SEQUENCE_NUMBER" ;;
+    sql: ${TABLE}.SEQUENCE_NUMBER ;;
   }
 
   dimension: session_id {
     type: string
-    sql: ${TABLE}."SESSION_ID" ;;
+    sql: ${TABLE}.SESSION_ID ;;
   }
 
   dimension: state {
     type: string
-    sql: ${TABLE}."STATE" ;;
+    sql: ${TABLE}.STATE ;;
   }
 
   dimension: traffic_source {
     type: string
-    sql: ${TABLE}."TRAFFIC_SOURCE" ;;
+    sql: ${TABLE}.TRAFFIC_SOURCE ;;
   }
 
   dimension: uri {
     type: string
-    sql: ${TABLE}."URI" ;;
+    sql: ${TABLE}.URI ;;
   }
 
   dimension: user_id {
     type: number
-    sql: ${TABLE}."USER_ID" ;;
+    sql: ${TABLE}.USER_ID ;;
   }
 
   dimension: zip {
     type: zipcode
-    sql: ${TABLE}."ZIP" ;;
+    sql: ${TABLE}.ZIP ;;
   }
 
   measure: count {
