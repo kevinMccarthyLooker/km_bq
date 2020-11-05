@@ -1,4 +1,4 @@
-include: "/views/order_items.view"
+include: "/views/order_items__snowlooker.view"
 include: "order_items_explore"
 
 view: order_item_pop_helper {

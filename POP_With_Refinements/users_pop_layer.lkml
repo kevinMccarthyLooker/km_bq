@@ -150,6 +150,7 @@ explore: +users {
     measures: [count]
   }
   query: lifetime_events_for_cohort_vs_12_months_prior_cohort{
+
     label: "z_last_example: Lifetime Events For Cohort Vs 12 Months Prior Cohort"
     description: "group data by week and compare to the week that was 52 weeks prior to that week. Differs slightly from YOY by calendar days"
     dimensions: [created_month,created_date_current_vs_prior_period]

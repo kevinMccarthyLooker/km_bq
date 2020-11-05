@@ -1,93 +1,68 @@
 view: order_items {
-  sql_table_name: "PUBLIC"."ORDER_ITEMS"
+  sql_table_name: `lookerdata.thelook_web_analytics.order_items`
     ;;
   drill_fields: [id]
 
   dimension: id {
     primary_key: yes
     type: number
-    sql: ${TABLE}."ID" ;;
+    sql: ${TABLE}.id ;;
   }
 
+#   dimension: created_at {
+#     type: string
+#     sql: ${TABLE}.created_at ;;
+#   }
   dimension_group: created {
     type: time
-    timeframes: [
-      raw,
-      time,
-      date,
-      week,
-      month,
-      quarter,
-      year
-    ]
-    sql: ${TABLE}."CREATED_AT"/*heyhey*/ ;;
+    timeframes: [date,month]
+    sql: timestamp(${TABLE}.created_at) ;;
   }
+
+#   dimension: delivered_at {
+#     type: string
+#     sql: ${TABLE}.delivered_at ;;
+#   }
 
   dimension_group: delivered {
     type: time
-    timeframes: [
-      raw,
-      time,
-      date,
-      week,
-      month,
-      quarter,
-      year
-    ]
-    sql: ${TABLE}."DELIVERED_AT" ;;
+    timeframes: [date,month]
+    sql: timestamp(nullif(${TABLE}.delivered_at,'/N')) ;;
   }
 
   dimension: inventory_item_id {
     type: number
-    sql: ${TABLE}."INVENTORY_ITEM_ID" ;;
+    sql: ${TABLE}.inventory_item_id ;;
   }
 
   dimension: order_id {
     type: number
-    sql: ${TABLE}."ORDER_ID" ;;
+    sql: ${TABLE}.order_id ;;
   }
 
-  dimension_group: returned {
-    type: time
-    timeframes: [
-      raw,
-      time,
-      date,
-      week,
-      month,
-      quarter,
-      year
-    ]
-    sql: ${TABLE}."RETURNED_AT" ;;
+  dimension: returned_at {
+    type: string
+    sql: ${TABLE}.returned_at ;;
   }
 
   dimension: sale_price {
     type: number
-    sql: ${TABLE}."SALE_PRICE" ;;
+    sql: ${TABLE}.sale_price ;;
   }
 
-  dimension_group: shipped {
-    type: time
-    timeframes: [
-      raw,
-      time,
-      date,
-      week,
-      month,
-      quarter,
-      year
-    ]
-    sql: ${TABLE}."SHIPPED_AT" ;;
+  dimension: shipped_at {
+    type: string
+    sql: ${TABLE}.shipped_at ;;
   }
 
   dimension: status {
     type: string
-    sql: ${TABLE}."STATUS" ;;
+    sql: ${TABLE}.status ;;
   }
 
   dimension: user_id {
     type: number
-    sql: ${TABLE}."USER_ID" ;;
+    sql: ${TABLE}.user_id ;;
   }
 
   measure: count {
